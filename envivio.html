@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Transmisión en Vivo</title>
+  <style>
+    body {
+      margin: 0;
+      background-image: url('https://i.postimg.cc/QtW9kQY8/fondo-ganga.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    iframe {
+      width: 90vw;
+      height: 50vw;
+      max-width: 1000px;
+      border: none;
+      z-index: 1;
+    }
+
+    #cohetesGif {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://i.gifer.com/4M57.gif') center center no-repeat;
+      background-size: cover;
+      z-index: 9999;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <iframe id="youtube-frame" allowfullscreen allow="autoplay"></iframe>
+  <div id="cohetesGif"></div>
+
+  <!-- Sonido de cohetes -->
+  <audio id="sonidoCohetes" src="https://monje122.github.io/cohetes-sonido/pirotecnia.mp3" preload="auto"></audio>
+
+  <!-- Librería Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const supabaseClient = supabase.createClient(
+        'https://ojucmysnudgozndeyhvz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qdWNteXNudWRnb3puZGV5aHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NDE4NDksImV4cCI6MjA2ODUxNzg0OX0.bUoYtdNIyzpSMLsIpA9fTokyEg8yv3AzPeo5S9eK8ro'
+      );
+
+      function extraerIDYoutube(link) {
+        try {
+          const url = new URL(link);
+          return url.hostname === "youtu.be" ? url.pathname.slice(1) : url.searchParams.get("v");
+        } catch {
+          return null;
+        }
+      }
+
+      async function cargarVideo() {
+        const { data, error } = await supabaseClient
+          .from('configuracion')
+          .select('valore')
+          .eq('clave', 'youtube_live')
+          .single();
+
+        if (error || !data) {
+          document.body.innerHTML = "<h2 style='color: white;'>Error al cargar el video</h2>";
+          return;
+        }
+
+        const id = extraerIDYoutube(data.valore);
+        document.getElementById("youtube-frame").src =
+          id ? `https://www.youtube.com/embed/${id}?autoplay=1` : "<h2 style='color: white;'>Enlace inválido</h2>";
+      }
+
+      await cargarVideo();
+
+      // 🔊 Reproducir cohetes con sonido en tiempo real
+      supabaseClient
+        .channel('cohetes')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'configuracion',
+          filter: 'clave=eq.cohetes_activados'
+        }, async (payload) => {
+          const valor = payload.new.valore;
+          if (valor === true || valor === "true") {
+            const gif = document.getElementById('cohetesGif');
+            const sonido = document.getElementById('sonidoCohetes');
+
+            gif.style.display = 'block';
+            try {
+              sonido.currentTime = 0;
+              await sonido.play();
+            } catch (e) {
+              console.warn("⚠️ Sonido bloqueado por navegador (autoplay)", e);
+            }
+
+            setTimeout(() => {
+              gif.style.display = 'none';
+              sonido.pause();
+              sonido.currentTime = 0;
+
+              supabaseClient
+                .from('configuracion')
+                .update({ valore: false })
+                .eq('clave', 'cohetes_activados');
+            }, 10000);
+          }
+        })
+        .subscribe();
+    });
+  </script>
+</body>
+</html>
