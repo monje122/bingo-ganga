@@ -475,20 +475,49 @@ document.getElementById('cerrarVentasBtn').addEventListener('click', async () =>
   }
 });
 
-// Reiniciar base de datos
+// Borra todos los comprobantes del bucket en lote (eficiente, como en tickets)
+async function borrarComprobantesBucketLote() {
+  const { data: archivos, error: errorArchivos } = await supabase.storage.from('comprobantes').list('', { limit: 1000 });
+  if (errorArchivos) {
+    alert('Error listando archivos del bucket');
+    console.error(errorArchivos);
+    return;
+  }
+  if (!archivos || archivos.length === 0) {
+    console.log('No hay comprobantes para borrar en el bucket.');
+    return;
+  }
+  const nombres = archivos.map(f => f.name);
+  const { error: errorBorrado } = await supabase.storage.from('comprobantes').remove(nombres);
+  if (errorBorrado) {
+    alert('Error borrando archivos del bucket');
+    console.error(errorBorrado);
+  } else {
+    console.log(`¡Se borraron ${nombres.length} archivos de comprobantes exitosamente!`);
+  }
+}
+
+// Función principal de reinicio TOTAL
 async function reiniciarTodo() {
   if (!confirm('¿Estás seguro de reiniciar todo?')) return;
+
+  // 1. Borra TODAS las inscripciones
   await supabase.from('inscripciones').delete().neq('cedula', '');
+
+  // 2. Borra TODOS los cartones
   await supabase.from('cartones').delete().neq('numero', 0);
-  const { data: archivos } = await supabase.storage.from('comprobantes').list();
+
+  // 3. Borra TODOS los comprobantes del bucket en lote
+  await borrarComprobantesBucketLote();
+
+  // 4. Limpia la interfaz si aplica
   const listaDiv = document.getElementById('listaAprobados');
   if (listaDiv) listaDiv.innerHTML = '';
-  for (const file of archivos) {
-    await supabase.storage.from('comprobantes').remove([file.name]);
-  }
+
   alert('Datos reiniciados');
   location.reload();
 }
+
 
 // Variables para modal
 let cartonSeleccionadoTemporal = null;
