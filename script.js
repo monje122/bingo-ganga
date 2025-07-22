@@ -19,7 +19,10 @@ window.addEventListener('DOMContentLoaded', async () => {
    await cargarPrecioPorCarton();
   await cargarConfiguracionModoCartones(); 
   generarCartones();// genera del 1 al totalCartones
-
+  const btnReiniciar = document.getElementById('btnReiniciarTodo');
+  if (btnReiniciar) {
+    btnReiniciar.onclick = reiniciarTodo;
+  }
 });
 
 
@@ -238,12 +241,17 @@ async function enviarComprobante() {
     }
 
     const nombreArchivo = `${usuario.cedula}-${Date.now()}.jpg`;
-    const { error: errorUpload } = await supabase.storage.from('comprobantes').upload(nombreArchivo, archivo);
+    const { error: errorUpload } = await supabase.storage.from('comprobante').upload(nombreArchivo, archivo);
     if (errorUpload) {
       throw new Error('Error subiendo imagen');
     }
 
-    const urlPublica = `${supabaseUrl}/storage/v1/object/public/comprobantes/${nombreArchivo}`;
+    const { data, error } = supabase.storage.from('comprobante').getPublicUrl(nombreArchivo);
+if (error || !data.publicUrl) {
+  throw new Error('No se pudo obtener la URL pública del comprobante');
+}
+const urlPublica = data.publicUrl;
+
 
     const { data: cartonesExistentes, error: errorVerificacion } = await supabase
       .from('cartones')
@@ -475,48 +483,36 @@ document.getElementById('cerrarVentasBtn').addEventListener('click', async () =>
   }
 });
 
-// Borra todos los comprobantes del bucket en lote (eficiente, como en tickets)
-async function borrarComprobantesBucketLote() {
-  const { data: archivos, error: errorArchivos } = await supabase.storage.from('comprobantes').list('', { limit: 1000 });
-  if (errorArchivos) {
-    alert('Error listando archivos del bucket');
-    console.error(errorArchivos);
-    return;
-  }
-  if (!archivos || archivos.length === 0) {
-    console.log('No hay comprobantes para borrar en el bucket.');
-    return;
-  }
-  const nombres = archivos.map(f => f.name);
-  const { error: errorBorrado } = await supabase.storage.from('comprobantes').remove(nombres);
-  if (errorBorrado) {
-    alert('Error borrando archivos del bucket');
-    console.error(errorBorrado);
-  } else {
-    console.log(`¡Se borraron ${nombres.length} archivos de comprobantes exitosamente!`);
-  }
-}
-
-// Función principal de reinicio TOTAL
 async function reiniciarTodo() {
   if (!confirm('¿Estás seguro de reiniciar todo?')) return;
 
-  // 1. Borra TODAS las inscripciones
+  // BORRAR TODOS LOS COMPROBANTES DEL BUCKET "comprobante"
+  const { data: archivos, error } = await supabase.storage.from('comprobante').list();
+  if (error) { 
+    alert('Error listando archivos: ' + error.message); 
+    return; 
+  }
+  if (archivos && archivos.length > 0) {
+    const nombres = archivos.map(f => f.name);
+    const { error: errorBorrado } = await supabase.storage.from('comprobante').remove(nombres);
+    if (errorBorrado) {
+      alert('Error borrando archivos del bucket: ' + errorBorrado.message);
+      return;
+    }
+  }
+
+  // BORRA TODAS LAS INSCRIPCIONES
   await supabase.from('inscripciones').delete().neq('cedula', '');
 
-  // 2. Borra TODOS los cartones
+  // BORRA TODOS LOS CARTONES
   await supabase.from('cartones').delete().neq('numero', 0);
 
-  // 3. Borra TODOS los comprobantes del bucket en lote
-  await borrarComprobantesBucketLote();
-
-  // 4. Limpia la interfaz si aplica
-  const listaDiv = document.getElementById('listaAprobados');
-  if (listaDiv) listaDiv.innerHTML = '';
-
-  alert('Datos reiniciados');
+  alert('¡Todos los comprobantes, inscripciones y cartones han sido eliminados!');
   location.reload();
 }
+
+
+
 
 
 // Variables para modal
@@ -658,7 +654,7 @@ async function rechazar(inscripcionId, cartones, comprobanteURL) {
   const filename = comprobanteURL.split('/').pop(); // obtén el nombre del archivo
   await supabase
     .storage
-    .from('comprobantes')
+    .from('comprobante')
     .remove([filename]);
 
   // 4. Recargar la lista
@@ -692,7 +688,7 @@ async function rechazarInscripcion(item, tr) {
   const urlSplit = item.comprobante.split('/');
   const nombreArchivo = urlSplit[urlSplit.length - 1];
 
-  await supabase.storage.from('comprobantes').remove([nombreArchivo]);
+  await supabase.storage.from('comprobante').remove([nombreArchivo]);
 
   // Eliminar fila de la tabla visual
   tr.remove();
@@ -1302,7 +1298,7 @@ async function eliminarInscripcion(item, fila) {
     if (item.comprobante) {
       const partes = item.comprobante.split('/');
       const nombreArchivo = partes.pop();
-      await supabase.storage.from('comprobantes').remove([nombreArchivo]);
+      await supabase.storage.from('comprobante').remove([nombreArchivo]);
     }
 
     // 3. Eliminar inscripción
@@ -1340,7 +1336,7 @@ async function eliminarInscripcion(item, fila) {
   }
 }
 function ordenarInscripcionesPorNombre() {
-  const tabla = document.querySelector('#tabla-comprobantes tbody');
+  const tabla = document.querySelector('#tabla-comprobante tbody');
   const filas = Array.from(tabla.rows);
 
   // Ordena por nombre (columna 0)
@@ -1357,7 +1353,7 @@ function ordenarInscripcionesPorNombre() {
 let ordenCedulaAscendente = true;
 
 function ordenarPorCedula() {
-  const tabla = document.querySelector('#tabla-comprobantes tbody');
+  const tabla = document.querySelector('#tabla-comprobante tbody');
   const filas = Array.from(tabla.rows);
 
   filas.sort((a, b) => {
