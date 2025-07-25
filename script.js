@@ -924,6 +924,38 @@ document.getElementById('imprimirListaBtn').addEventListener('click', () => {
   }
   window.print();
 });
+
+document.getElementById('exportarExcelBtn').addEventListener('click', async () => {
+  const { data, error } = await supabase
+    .from('inscripciones')
+    .select('*')
+    .eq('estado', 'aprobado');
+
+  if (error || !data.length) {
+    alert('No hay datos para exportar');
+    return;
+  }
+
+  const filas = [];
+  filas.push(["Nombre", "Cédula", "Teléfono", "Referido", "Cartones"]);
+
+  data.forEach(item => {
+    filas.push([
+      item.nombre,
+      item.cedula,
+      item.telefono,
+      item.referido || '',
+      item.cartones.join(', ')
+    ]);
+  });
+
+  const hoja = XLSX.utils.aoa_to_sheet(filas);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, "Aprobados");
+
+  XLSX.writeFile(libro, "lista_aprobados.xlsx");
+});
+
 async function cargarListaAprobadosSeccion() {
   const { data, error } = await supabase
     .from('inscripciones')
