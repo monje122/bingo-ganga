@@ -1400,3 +1400,52 @@ function ordenarPorCedula() {
 
   ordenCedulaAscendente = !ordenCedulaAscendente;
 }
+async function buscarPorCarton() {
+  const numeroBuscado = parseInt(document.getElementById('buscar-carton-numero').value);
+  const resultadoDiv = document.getElementById('resultado-busqueda-carton');
+
+  if (isNaN(numeroBuscado)) {
+    resultadoDiv.innerHTML = '<p style="color: red;">Por favor, ingresa un número válido.</p>';
+    return;
+  }
+
+  // Consultamos todas las inscripciones que tienen cartones asignados
+  const { data, error } = await supabase
+    .from('inscripciones')
+    .select('*');
+
+  if (error || !data.length) {
+    resultadoDiv.innerHTML = '<p style="color: red;">Error al buscar los datos.</p>';
+    return;
+  }
+
+  // Buscamos si alguno tiene ese cartón
+const encontrado = data.find(item => {
+  let lista = [];
+
+  try {
+    lista = Array.isArray(item.cartones)
+      ? item.cartones.map(n => parseInt(n))
+      : typeof item.cartones === 'string'
+        ? JSON.parse(item.cartones).map(n => parseInt(n))
+        : [];
+  } catch (err) {
+    lista = [];
+  }
+
+  return lista.includes(numeroBuscado);
+});
+
+
+  if (encontrado) {
+    resultadoDiv.innerHTML = `
+      <p><strong>Nombre:</strong> ${encontrado.nombre}</p>
+      <p><strong>Cédula:</strong> ${encontrado.cedula}</p>
+      <p><strong>Teléfono:</strong> ${encontrado.telefono}</p>
+      <p><strong>Referido:</strong> ${encontrado.referido || 'N/A'}</p>
+      <p><strong>Otros cartones:</strong> ${encontrado.cartones.join(', ')}</p>
+    `;
+  } else {
+    resultadoDiv.innerHTML = `<p style="color: orange;">El cartón ${numeroBuscado} no ha sido asignado a nadie.</p>`;
+  }
+}
