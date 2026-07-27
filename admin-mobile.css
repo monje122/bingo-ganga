@@ -1,139 +1,118 @@
 @media (max-width: 700px) {
   #tab-ventas > .panel-section:first-child {
-    padding: 16px 12px !important;
     overflow: hidden !important;
   }
 
   #tab-ventas > .panel-section:first-child .table-wrapper {
-    overflow: visible !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px !important;
+    border: 1px solid #e0e0e0 !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
   }
 
   #admin-panel #tabla-comprobantes {
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    margin: 12px 0 0 !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
+    display: table !important;
+    width: max-content !important;
+    min-width: 1040px !important;
     table-layout: auto !important;
-    background: transparent !important;
+    border-collapse: collapse !important;
+    background: #ffffff !important;
   }
 
   #admin-panel #tabla-comprobantes thead {
-    display: none !important;
-  }
-
-  #admin-panel #tabla-comprobantes tbody,
-  #admin-panel #tabla-comprobantes tr,
-  #admin-panel #tabla-comprobantes td {
-    display: block !important;
-    width: 100% !important;
+    display: table-header-group !important;
   }
 
   #admin-panel #tabla-comprobantes tbody {
-    background: transparent !important;
+    display: table-row-group !important;
   }
 
   #admin-panel #tabla-comprobantes tr {
-    margin: 0 0 14px !important;
-    padding: 12px !important;
-    border: 1px solid #e1e5ee !important;
-    border-radius: 14px !important;
-    background: #ffffff !important;
-    box-shadow: 0 8px 20px rgba(2, 10, 53, .08) !important;
+    display: table-row !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
+  #admin-panel #tabla-comprobantes th,
   #admin-panel #tabla-comprobantes td {
-    display: grid !important;
-    grid-template-columns: 92px minmax(0, 1fr) !important;
-    align-items: start !important;
-    gap: 8px !important;
-    min-height: 38px !important;
-    padding: 10px 0 !important;
-    border-bottom: 1px solid #edf0f5 !important;
+    display: table-cell !important;
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 10px 8px !important;
+    border-bottom: 1px solid #e8e8e8 !important;
     color: #2c3e50 !important;
-    text-align: left !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
+    text-align: center !important;
     white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    vertical-align: middle !important;
+  }
+
+  #admin-panel #tabla-comprobantes th {
+    background: linear-gradient(135deg, #ffff00, #f9e65c) !important;
+    color: #1a1a2e !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
   }
 
   #admin-panel #tabla-comprobantes td::before {
-    color: #5f6670 !important;
-    font-size: 11px !important;
-    font-weight: 900 !important;
-    letter-spacing: .3px !important;
-    line-height: 1.3 !important;
-    text-transform: uppercase !important;
+    content: none !important;
   }
 
-  #admin-panel #tabla-comprobantes td:nth-child(1)::before { content: "Nombre"; }
-  #admin-panel #tabla-comprobantes td:nth-child(2)::before { content: "Teléfono"; }
-  #admin-panel #tabla-comprobantes td:nth-child(3)::before { content: "Cédula"; }
-  #admin-panel #tabla-comprobantes td:nth-child(4)::before { content: "Referido"; }
-  #admin-panel #tabla-comprobantes td:nth-child(5)::before { content: "Cartones"; }
-  #admin-panel #tabla-comprobantes td:nth-child(6)::before { content: "Referencia"; }
-  #admin-panel #tabla-comprobantes td:nth-child(7)::before { content: "Comprobante"; }
-  #admin-panel #tabla-comprobantes td:nth-child(8)::before { content: "Pago móvil"; }
-  #admin-panel #tabla-comprobantes td:nth-child(9)::before { content: "Acción"; }
-
-  #admin-panel #tabla-comprobantes td:nth-child(7),
-  #admin-panel #tabla-comprobantes td:nth-child(8),
-  #admin-panel #tabla-comprobantes td:nth-child(9) {
-    grid-template-columns: 1fr !important;
-  }
-
-  #admin-panel #tabla-comprobantes td:nth-child(8) {
-    margin: 8px 0 !important;
-    padding: 12px !important;
-    border-radius: 12px !important;
-    background: #f8fafc !important;
-  }
-
-  #admin-panel #tabla-comprobantes td:nth-child(9) {
-    padding-bottom: 0 !important;
-    border-bottom: 0 !important;
-  }
-
-  #admin-panel #tabla-comprobantes td a {
-    overflow-wrap: anywhere !important;
-  }
+  #admin-panel #tabla-comprobantes th:nth-child(1),
+  #admin-panel #tabla-comprobantes td:nth-child(1) { min-width: 140px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(2),
+  #admin-panel #tabla-comprobantes td:nth-child(2) { min-width: 120px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(3),
+  #admin-panel #tabla-comprobantes td:nth-child(3) { min-width: 110px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(4),
+  #admin-panel #tabla-comprobantes td:nth-child(4) { min-width: 110px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(5),
+  #admin-panel #tabla-comprobantes td:nth-child(5) { min-width: 120px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(6),
+  #admin-panel #tabla-comprobantes td:nth-child(6) { min-width: 110px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(7),
+  #admin-panel #tabla-comprobantes td:nth-child(7) { min-width: 100px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(8),
+  #admin-panel #tabla-comprobantes td:nth-child(8) { min-width: 170px !important; }
+  #admin-panel #tabla-comprobantes th:nth-child(9),
+  #admin-panel #tabla-comprobantes td:nth-child(9) { min-width: 120px !important; }
 
   #admin-panel #tabla-comprobantes img {
-    width: 88px !important;
-    height: 88px !important;
-    margin: 4px 0 0 !important;
-  }
-
-  #admin-panel #tabla-comprobantes .celda-ref {
-    white-space: normal !important;
+    width: 58px !important;
+    height: 58px !important;
+    margin: 0 auto !important;
   }
 
   #admin-panel #tabla-comprobantes .btn-accion {
     display: inline-flex !important;
+    width: 34px !important;
+    height: 34px !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 46px !important;
-    height: 42px !important;
-    margin: 6px 5px 0 0 !important;
+    margin: 2px !important;
     padding: 0 !important;
-    border: 1px solid #e1e5ee !important;
-    border-radius: 10px !important;
-    background: #f6f8fb !important;
-    vertical-align: middle !important;
+    background: transparent !important;
+    border: 0 !important;
+    font-size: 18px !important;
   }
 
   #admin-panel #tabla-comprobantes .btn-copiar-pago {
-    width: 100% !important;
+    width: auto !important;
+    min-width: 94px !important;
     max-width: none !important;
-    margin: 10px 0 0 !important;
-    padding: 10px 12px !important;
-    border-radius: 10px !important;
+    margin: 8px auto 0 !important;
+    padding: 8px 10px !important;
     background: #ffff00 !important;
     color: #020a35 !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
 }
